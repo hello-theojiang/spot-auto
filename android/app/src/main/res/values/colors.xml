@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="osa_bg">#FF07090F</color>
+    <color name="osa_surface">#FF0C0F18</color>
+    <color name="osa_accent">#FF6EE7FF</color>
+    <color name="ic_launcher_background">#FF0C0F18</color>
+</resources>

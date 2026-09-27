@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#07090f" />
+  <meta name="description" content="OpenSpotAuto — photographie des voitures, grimpe les tiers de rareté, collectionne le palmarès." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg" />
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <title>OpenSpotAuto — Car spotting holographique</title>
+</head>
+<body>
+  <div id="app" class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="assets/icons/icon.svg" alt="" class="brand-mark" />
+        <span class="brand-name">OpenSpotAuto</span>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <footer class="sidebar-footer">
+        <a href="#/legal/mentions-legales">Mentions légales</a>
+        <a href="#/legal/cgu">CGU</a>
+      </footer>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="view" id="view"></div>
+      <footer class="main-footer">
+        <span>© 2026 OpenSpotAuto</span>
+        <span class="main-footer-links">
+          <a href="#/legal/mentions-legales">Mentions légales</a>
+          <a href="#/legal/cgu">CGU</a>
+        </span>
+      </footer>
+    </main>
+
+    <nav class="tabbar" id="tabbar"></nav>
+    <div id="modal-root"></div>
+    <div id="toast-root"></div>
+  </div>
+
+  <script src="assets/js/catalog.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/photos.js"></script>
+  <script src="assets/js/anticheat.js"></script>
+  <script src="assets/js/camera.js"></script>
+  <script src="assets/js/ai.js"></script>
+  <script src="assets/js/scoring.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/views/home.js"></script>
+  <script src="assets/js/views/capture.js"></script>
+  <script src="assets/js/views/spots.js"></script>
+  <script src="assets/js/views/spot.js"></script>
+  <script src="assets/js/views/classement.js"></script>
+  <script src="assets/js/views/palmares.js"></script>
+  <script src="assets/js/views/profils.js"></script>
+  <script src="assets/js/views/reglages.js"></script>
+  <script src="assets/js/views/legal.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

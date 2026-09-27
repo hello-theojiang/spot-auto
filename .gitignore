@@ -1,0 +1,17 @@
+# Android / Gradle
+**/build/
+.gradle/
+local.properties
+*.apk
+*.aab
+
+# OS / éditeur
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs / divers
+*.log
+node_modules/
