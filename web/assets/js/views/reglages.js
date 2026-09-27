@@ -12,11 +12,28 @@ const ReglagesView = (() => {
       <h1>Réglages</h1>
 
       <div class="panel">
+        <h2>Profil</h2>
+        ${p ? `
+          <div class="profile-row active">
+            <span class="profile-avatar">${UI.esc(p.avatar)}</span>
+            <div class="profile-info">
+              <b>${UI.esc(p.name)}</b>
+              <span class="dim">${Store.profileStats(p.id).score} pts · ${Store.profileStats(p.id).count} spots</span>
+            </div>
+            <a class="btn btn-small" href="#/profils">Gérer les profils</a>
+          </div>` : `
+          <p class="hint">Aucun profil actif.</p>
+          <a class="btn btn-primary" href="#/profils">Créer un profil</a>`}
+      </div>
+
+      <div class="panel">
         <h2>Identification IA (optionnel)</h2>
         <p class="hint">Colle une clé <b>Gemini</b> gratuite (Google AI Studio) pour identifier automatiquement la voiture sur la photo. Sans clé → sélection manuelle au catalogue. La clé reste stockée sur cet appareil.</p>
-        <input class="input" id="gemini-key" type="password" placeholder="Clé API Gemini" value="${UI.esc(s.geminiKey)}">
+        <input class="input" id="gemini-key" type="password" placeholder="Clé API Gemini" value="${UI.esc(s.geminiKey)}" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <p class="hint" id="key-state">${s.geminiKey ? "✔ Clé enregistrée sur cet appareil" : "Aucune clé enregistrée"}</p>
         <div class="row-gap">
-          <button class="btn" id="save-key">Enregistrer la clé</button>
+          <button class="btn btn-primary" id="save-key">Enregistrer la clé</button>
+          ${s.geminiKey ? `<button class="btn" id="del-key">Supprimer</button>` : ""}
           <a class="btn" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Obtenir une clé ↗</a>
         </div>
       </div>
@@ -52,15 +69,34 @@ const ReglagesView = (() => {
         <p class="hint" id="cat-stats"></p>
       </div>
 
+      <div class="panel">
+        <h2>Légal</h2>
+        <div class="row-gap">
+          <a class="btn" href="#/legal/cgu">Conditions d'utilisation</a>
+          <a class="btn" href="#/legal/mentions-legales">Mentions légales</a>
+        </div>
+      </div>
+
       <div class="panel danger-zone">
         <h2>Zone dangereuse</h2>
         ${p ? `<button class="btn btn-danger" id="reset">Réinitialiser toutes mes données</button>` : `<p class="hint">Aucun profil actif.</p>`}
       </div>`;
 
     el.querySelector("#save-key").onclick = () => {
-      Store.setSettings({ geminiKey: el.querySelector("#gemini-key").value.trim() });
+      const v = el.querySelector("#gemini-key").value.trim();
+      if (!v) return UI.toast("Colle d'abord ta clé", "err");
+      Store.setSettings({ geminiKey: v });
       UI.toast("Clé enregistrée", "ok");
+      render(el);
     };
+    const delKey = el.querySelector("#del-key");
+    if (delKey) {
+      delKey.onclick = () => {
+        Store.setSettings({ geminiKey: "" });
+        UI.toast("Clé supprimée", "ok");
+        render(el);
+      };
+    }
     el.querySelector("#cooldown").onchange = (e) => {
       Store.setSettings({ cooldownSec: +e.target.value });
       UI.toast("Cooldown mis à jour", "ok");

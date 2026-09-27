@@ -1,5 +1,5 @@
 /* OpenSpotAuto — service worker : shell en cache, 100% hors-ligne. */
-const CACHE = "openspotauto-v1";
+const CACHE = "openspotauto-v2";
 const SHELL = [
   ".",
   "index.html",

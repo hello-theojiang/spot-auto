@@ -11,6 +11,7 @@ const App = (() => {
     { route: "#/spots",      label: "Garage",     icon: "garage" },
     { route: "#/classement", label: "Classement", icon: "trophy" },
     { route: "#/palmares",   label: "Palmarès",   icon: "medal" },
+    { route: "#/reglages",   label: "Réglages",   icon: "gear" },
   ];
 
   const ROUTES = [
@@ -46,8 +47,7 @@ const App = (() => {
     ).join("");
     document.getElementById("tabbar").innerHTML = html;
     document.getElementById("nav").innerHTML = html +
-      `<a href="#/profils" data-route="#/profils">${UI.icon("users")}<span>Profils</span></a>
-       <a href="#/reglages" data-route="#/reglages">${UI.icon("gear")}<span>Réglages</span></a>`;
+      `<a href="#/profils" data-route="#/profils">${UI.icon("users")}<span>Profils</span></a>`;
   }
 
   function highlightNav(hash) {

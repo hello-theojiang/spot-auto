@@ -67,9 +67,10 @@ const CaptureView = (() => {
           <div class="cam-cross"></div>
         </div>
       </div>
+      <div class="cam-gap"></div>
       <div class="cam-actions">
-        <button class="btn btn-primary btn-lg shutter" id="shutter" disabled>
-          ${UI.icon("capture")} Capturer
+        <button class="btn btn-primary shutter" id="shutter" disabled title="Capturer">
+          ${UI.icon("capture")}
         </button>
         <p class="hint" id="shutter-hint">Vise une vraie scène — la photo d'un écran ou d'une affiche est bloquée.</p>
       </div>`;
@@ -81,6 +82,9 @@ const CaptureView = (() => {
 
     try {
       await Cam.start(video);
+      // Préchauffe la géoloc : à la capture, le fix est déjà en cache
+      // et le getPosition de capture() retourne quasi instantanément.
+      Cam.getPosition();
     } catch (e) {
       stage.innerHTML = `
         <div class="panel center">
@@ -128,19 +132,24 @@ const CaptureView = (() => {
       try {
         shot = await Cam.capture(video);
         shot.previewUrl = URL.createObjectURL(shot.blob);
+        shot.gps = null;
+        // Le fix GPS arrive en arrière-plan : maj de l'affichage dès réception
+        shot.gpsPromise.then((g) => {
+          shot.gps = g;
+          const gpsEl = document.getElementById("shot-gps");
+          if (gpsEl) gpsEl.innerHTML = gpsLine(g);
+        });
       } catch {
         UI.toast("Échec de la capture", "err");
         updateShutter();
         return;
       }
 
-      // Doublon perceptuel → blocage
-      const flags = AntiCheat.spotFlags(
-        { ts: Date.now(), gps: shot.gps, phash: shot.phash },
-        Store.getSpots()
+      // Doublon perceptuel → blocage immédiat (check synchrone)
+      const dup = Store.getSpots().find(
+        (s) => AntiCheat.hamming(s.phash, shot.phash) <= AntiCheat.DUPLICATE_LIMIT
       );
-      shot.flags = flags;
-      if (flags.includes("photo-dupliquee")) {
+      if (dup) {
         UI.toast("Photo quasi identique à un spot existant — rejetée", "err");
         shot = null;
         updateShutter();
@@ -155,15 +164,18 @@ const CaptureView = (() => {
 
   /* ---------- Étape 2 : identification du modèle ---------- */
 
+  const gpsLine = (g) => g
+    ? `${UI.icon("pin")} ${g.lat}, ${g.lng} (±${g.acc} m)`
+    : `${UI.icon("warn")} GPS indisponible`;
+
   function renderSelect(stage) {
     stage.innerHTML = `
       <div class="panel shot-preview">
         <img src="${shot.previewUrl}" alt="capture">
         <div class="shot-meta">
-          ${shot.gps ? `${UI.icon("pin")} ${shot.gps.lat}, ${shot.gps.lng} (±${shot.gps.acc} m)` : `${UI.icon("warn")} GPS indisponible`}
+          <span id="shot-gps">${shot.gps ? gpsLine(shot.gps) : `${UI.icon("pin")} Localisation…`}</span>
           · ${UI.icon("clock")} ${UI.fmtDate(Date.now())}
         </div>
-        ${shot.flags.length ? `<p class="warn-block">${UI.icon("warn")} ${shot.flags.join(", ")}</p>` : ""}
       </div>
 
       <div class="panel">
@@ -271,7 +283,19 @@ const CaptureView = (() => {
     const tier = Catalog.modelTier(selection.brand, selection.model);
     const pts = Scoring.computePoints(selection.brand, selection.model, tier.id, spots);
 
+    // GPS : quasiment toujours résolu (préchauffé) ; on borne l'attente à 2,5 s
+    if (!shot.gps && shot.gpsPromise) {
+      shot.gps = await Promise.race([
+        shot.gpsPromise,
+        new Promise((r) => setTimeout(() => r(null), 2500)),
+      ]);
+    }
     const ts = Date.now();
+    const flags = AntiCheat.spotFlags(
+      { ts, gps: shot.gps, phash: shot.phash },
+      spots
+    ).filter((f) => f !== "photo-dupliquee"); // doublon déjà rejeté au déclencheur
+    shot.flags = flags;
     const photoId = `ph${ts}${Math.floor(Math.random() * 999)}`;
     const digest = await AntiCheat.sha256(
       [Store.ledgerTip || "GENESIS", shot.phash, ts, selection.brand, selection.model].join("|")
@@ -291,7 +315,7 @@ const CaptureView = (() => {
       meta: shot.meta,
       phash: shot.phash,
       digest,
-      flags: shot.flags || [],
+      flags,
     };
 
     await Photos.put(photoId, shot.blob);

@@ -109,12 +109,16 @@ const Cam = (() => {
     if (!blob) throw new Error("capture-failed");
 
     const phash = AntiCheat.dHash(c);
-    const [gps, cam] = [await getPosition(), settings()];
+    const cam = settings();
+    // GPS lancé sans attendre : le fix est souvent déjà en cache
+    // (préchauffé à l'ouverture de la caméra) et on l'affiche dès
+    // qu'il arrive — la capture ne doit jamais bloquer dessus.
+    const gpsPromise = getPosition();
 
     return {
       blob,
       phash,
-      gps,
+      gpsPromise,
       meta: {
         w, h,
         camW: cam.width || null,
